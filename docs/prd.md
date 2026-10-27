@@ -47,6 +47,7 @@ In game
 - One hotkey toggles it. One hotkey enters edit mode (drag to reposition, then locks back to click-through).
 - The build panel checks off items already owned and highlights the next item in the path.
 - The skill panel shows the 1–18 level grid and highlights the current level's recommended ability.
+- Once calibrated, the ability-bar skill hint sits over the correct ability within 2 seconds of a level-up with an unspent point, and disappears within 2 seconds of spending it. Static the whole time.
 - No measurable FPS drop (under 3 fps difference with overlay on versus off). Overlay process under 2% CPU while polling.
 
 Data
@@ -73,6 +74,13 @@ In-game overlay (Live Client Data API), four tabs, Build open by default
 - Skills: 18-level grid, max order (for example Q > E > W), current level and next point highlighted using `activeplayerabilities` ranks.
 - Runes: the page currently running (from `activeplayerrunes`) with icons, next to the recommended page so mismatches are visible.
 - Tiers: tier list for the role this patch, the current champion highlighted.
+
+Ability-bar skill hint (Live Client Data API), a second, separate overlay window
+- A small marker drawn over League's own ability bar, above the recommended ability, shown only while there's an unspent skill point. Gone as soon as the point is spent.
+- Static only: no animation, flashing, sound or fade. It's a passive display of the recommended skill order, not a notification.
+- Click-through and non-focusable, same rules as the main panel.
+- Position is calibrated by hand: in edit mode the marker strip becomes draggable and resizable so it can be lined up over Q/W/E/R once; the result persists. Re-calibrate after changing resolution or HUD scale. No reading of League's settings files (not one of the four allowed data sources).
+- Toggle on/off independently of the main panel; on by default once calibrated.
 
 Crawler and stats (Riot Web API)
 - Ranked solo queue (queue 420), one region, Emerald and above by default.
@@ -214,6 +222,7 @@ The panel that gets looked at mid-game. Get this right before polishing anything
 - Default size about 280 × 360 px, 85% opacity, docked on the right edge above the minimap. Position and opacity persist.
 - Handle Windows display scaling (125%, 150%) so the panel lands where expected.
 - Highlights are static styling only. No animation, sound or flashing.
+- The ability-bar skill hint is its own window with the same flags (click-through, non-focusable, screen-saver level). Edit mode covers both windows at once. Its calibrated position and size persist separately from the panel's.
 
 ## 9. Plan
 
@@ -229,8 +238,9 @@ Ordered so the riskiest work happens first. Hours are optimistic.
 | 5 | Crawler: rate limiter, seeding, match and timeline fetch into SQLite. | 6 |
 | 6 | Aggregation: runes, skill order, starting items, core build, situational buckets, tiers. Unit tests on a small fixture set of real matches. | 6 |
 | 7 | Wire stats into the companion and overlay. Build, Skills, Runes, Tiers tabs. Low-sample fallback. | 4 |
-| 8 | Verification: 3 Practice Tool sessions, then 10 real games against the success criteria in section 4. Log failures. | 2 |
-| | Total | about 31 |
+| 7b | Ability-bar skill hint: second overlay window, edit-mode calibration over Q/W/E/R, shown only with an unspent point. Static. Before relying on it, re-check Riot's current third-party policy on in-game skill indicators. | 3 |
+| 8 | Verification: 3 Practice Tool sessions, then 10 real games against the success criteria in section 4, including the skill hint. Log failures. | 2 |
+| | Total | about 34 |
 
 Riskiest step: step 2. If the overlay steals focus, flickers, or can't sit over Borderless League cleanly, the whole in-game experience fails, and the fix may mean a different windowing approach. Find that out in the first week, not the third.
 
@@ -267,4 +277,5 @@ Assumed, to verify during the build:
 - Exact LCU endpoint paths in section 7 (unofficial, can change between patches).
 - Personal key rate limits and approval time.
 - Crawl throughput numbers in section 7.
+- That a static, recommendation-only marker over the ability bar is allowed (similar features exist in established apps). Verify against Riot's policy before step 7b ships.
 - That Riot's 2025 rule on minor rune data doesn't cover showing your own selected rune page. The overlay shows only the player's own runes, which the game itself already shows on the scoreboard.
