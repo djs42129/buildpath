@@ -1,0 +1,11 @@
+{
+  "name": "buildpath",
+  "private": true,
+  "description": "Shortcuts so desktop commands also work from the repo root",
+  "scripts": {
+    "dev": "npm --prefix desktop run dev",
+    "dev:mock": "npm --prefix desktop run dev:mock",
+    "build": "npm --prefix desktop run build",
+    "typecheck": "npm --prefix desktop run typecheck"
+  }
+}

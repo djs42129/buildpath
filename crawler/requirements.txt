@@ -1,0 +1,1 @@
+# Crawler dependencies (Python 3.12). Filled in at step 5.
